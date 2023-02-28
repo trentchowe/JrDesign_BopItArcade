@@ -25,3 +25,7 @@ void loop() {
     digitalWrite(ledPin, LOW);
   }
 }
+
+
+//Trent Howe
+//Mikayla Bernhard
