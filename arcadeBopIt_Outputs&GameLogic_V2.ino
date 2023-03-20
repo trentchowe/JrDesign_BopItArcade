@@ -1,10 +1,9 @@
-// #include <Wire.h> 
-// #include <LiquidCrystal_I2C.h>
+#include <Wire.h> 
+#include <LiquidCrystal_I2C.h>
 
-// //lcd I2C pins declaration
-// LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); 
+//lcd I2C pins declaration
+LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); 
 
-//do we need 7-segment code still?
 //TODO
 #define coinslotPin 9 //defining the pin for starting a new game to digital pin 9 (pin 15 of ATMega328P), this cannot
 //be the reset pin or else the initial start of the game (when the device is first turned on) cannot occur
@@ -30,11 +29,8 @@ void setup() {
   //read in the initial state of CLK (Output A) which should be 1 if it's not being turned due to its internal pullup resistor 
   lastStateCLK = digitalRead(CLK);
   //setup LCD screen
-  // lcd.begin(16,2);//Defining 16 columns and 2 rows of lcd display
-  // lcd.backlight();//To Power ON the back light
-
-  //setup 7segment code if we use it
-  //TODO
+  lcd.begin(16,2);//Defining 16 columns and 2 rows of lcd display
+  lcd.backlight();//To Power ON the back light
 
 }
 
@@ -116,7 +112,9 @@ bool checkAction1(int time)
     return false;
 }
 
-bool checkAction2(int time) {
+bool checkAction2(int time)
+//turn left
+{
     //play sound
 
     //then check for input
@@ -131,7 +129,9 @@ bool checkAction2(int time) {
     return false;
 }
 
-bool checkAction3(int time) {
+bool checkAction3(int time)
+//honk horn
+{
     //play sound
 
     //then check for input
@@ -147,7 +147,9 @@ bool checkAction3(int time) {
     
 }
 
-bool checkAction4(int time) {
+bool checkAction4(int time)
+//move joystick
+{
     //play sound
 
     //then check for input
