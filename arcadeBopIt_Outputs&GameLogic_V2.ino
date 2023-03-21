@@ -6,17 +6,17 @@
 //lcd I2C pins declaration
 LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE); 
 
-//MP3 setup
-// Use pins 2 and 3 to communicate with DFPlayer Mini
-static const uint8_t PIN_MP3_TX = 2; // Connects to module's RX 
-static const uint8_t PIN_MP3_RX = 3; // Connects to module's TX 
-SoftwareSerial softwareSerial(PIN_MP3_RX, PIN_MP3_TX);
+// //MP3 setup
+// // Use pins 2 and 3 to communicate with DFPlayer Mini
+// static const uint8_t PIN_MP3_TX = 2; // Connects to module's RX 
+// static const uint8_t PIN_MP3_RX = 3; // Connects to module's TX 
+// SoftwareSerial softwareSerial(PIN_MP3_RX, PIN_MP3_TX);
 
-const int wirePin = 4; 
-const int endPin = 5; 
+// const int wirePin = 4; 
+// const int endPin = 5; 
 
-// Create the Player object
-DFRobotDFPlayerMini player;
+// // Create the Player object
+// DFRobotDFPlayerMini player;
 
 //TODO
 #define coinslotPin 9 //defining the pin for starting a new game to digital pin 9 (pin 15 of ATMega328P), this cannot
@@ -30,10 +30,10 @@ DFRobotDFPlayerMini player;
 #define VRY_PIN  A1 // Arduino pin connected to VRY pin
 int lastStateCLK; //value (0 or 1) of previous state of Output A of rotary encoder
 //making this a global variable (outside of setup()) because it needs to be accessed by multiple functions
+int roundNum = 0;
 int xValue = 0; // To store value of the X axis
 int yValue = 0; // To store value of the Y axis
 bool started = false;
-int roundNum = 0;
 //const int coinslotPin = , ; //should not be needed since this is set to a pin in #define
 //since this is not a variable that needs to have values between -32768 and 32767 and instead just needs to be high or low
 
@@ -45,42 +45,47 @@ void setup() {
   pinMode(CLK,INPUT_PULLUP);
   pinMode(DT,INPUT_PULLUP);
   //read in the initial state of CLK (Output A) which should be 1 if it's not being turned due to its internal pullup resistor 
-  lastStateCLK = digitalRead(CLK);
+  double lastStateCLK = digitalRead(CLK);
+  pinMode(9, INPUT_PULLUP);
   //setup LCD screen
   lcd.begin(16,2);//Defining 16 columns and 2 rows of lcd display
   lcd.backlight();//To Power ON the back light
+  lcd.clear();//Clean the screen
+  lcd.setCursor(0,0); //Defining positon to write from, first row,first column .
+  lcd.print("Press to Start");
 	
   //MP3 player
   // Init USB serial port for debugging
   Serial.begin(9600);
-  // Init serial port for DFPlayer Mini
-  softwareSerial.begin(9600);
+  // // Init serial port for DFPlayer Mini
+  //softwareSerial.begin(9600);
 
-  // Start communication with DFPlayer Mini
-  if (player.begin(softwareSerial)) {
-	Serial.println("OK");
+  // // Start communication with DFPlayer Mini
+  // if (player.begin(softwareSerial)) {
+	// Serial.println("OK");
 
-	// Set volume to maximum (0 to 30).
-	player.volume(30);
-	// Play the first MP3 file on the SD card
-	player.play(1);
-  } else {
-  	Serial.println("Connecting to DFPlayer Mini failed!");
-  }
+	// // Set volume to maximum (0 to 30).
+	// player.volume(30);
+	// // Play the first MP3 file on the SD card
+	// player.play(1);
+  // } else {
+  // 	Serial.println("Connecting to DFPlayer Mini failed!");
+  // }
 
 }
 
 void loop() {
+  //Serial.println("Loop");
   // put your main code here, to run repeatedly:
     if(checkCoinslot()){
       started = true;
+      Serial.println("Game Start");
     }
-
     if(started)
     {
       //4 actions (turn right, turn left, honk it, shift it)
       int action = random(1, 4);
-      bool completed = 0; //checking if a proper action is done 
+      bool completed = 0; //checking if a proper action is done, initially this is 0 (false) 
 
       switch (action)
       {
@@ -100,7 +105,8 @@ void loop() {
           break;
       }
       
-      if(completed){
+      if(completed)//check if completed is true
+      {
         //can add playVictorySound() if we have time, not required
         displayroundNumCount();
         roundNum++;
@@ -131,6 +137,7 @@ bool checkCoinslot()
 bool checkAction1(int time) 
 //"Turn Right" steering wheel turn action
 {
+    Serial.println("Turn Right!");
     //play sound ("Turn Right" maybe?)
     //then check for input
     double startTime = millis(); //number of ms since Arduino program began running
@@ -138,13 +145,15 @@ bool checkAction1(int time)
     int Turn = TurnIt();
     while((endTime - startTime) <= (time*1000)) //time is in milliseconds so multiply seconds (time) by 1000
     {
-      if(Turn == 1)
-      {
-        Serial.println("")
-        return true;
-      }
-      endtime = millis();
+
+      // if(Turn == 1)
+      // {
+      //   Serial.println("Correct!");
+      //   return true;
+      // }
+      // endTime = millis();
     }
+    Serial.println("Out of Time!");
     return false;
 }
 
@@ -153,35 +162,49 @@ bool checkAction2(int time)
 {
     //play sound ("Turn Left" maybe?)
     //then check for input
+    Serial.println("Turn Left!");
     double startTime = millis(); //number of ms since Arduino program began running
     double endTime = startTime;
-    int Turn = TurnIt();
+    //variable to keep track if rotary encoder was turned
+    int Turn;
     while((endTime - startTime) <= (time*1000)) //time is in milliseconds so multiply seconds (time) by 1000
     {
+      //getting the value from TurnIt function to see if it is turned left (2)
+      Turn = TurnIt();
+      Serial.println(Turn);
       if(Turn == 2)
       {
-        Serial.println("")
+        Serial.println("Correct!");
         return true;
       }
-      endtime = millis();
+      endTime = millis();
     }
+    Serial.println("Out of Time!");
     return false;
 }
 
 bool checkAction3(int time)
 //honk horn
 {
+    Serial.println("Honk Horn!");
     //play sound
 
     //then check for input
-    startTime = millis();
-    endTime = startTime;
+    double startTime = millis();
+    double endTime = startTime;
+
+    double currentStateCLK = digitalRead(CLK);
+    lastStateCLK = currentStateCLK;
+    int btnState = digitalRead(SW);
+
     while((endTime - startTime) <= (time*1000)){ //time is in milliseconds
-      if(/*pinLogic*/){
+      if(btnState == HIGH){
+        Serial.println("Correct!");
         return true;
       }
-      endtime = millis();
+      endTime = millis();
     }
+    Serial.println("Out of Time!");
     return false;
     
 }
@@ -189,20 +212,23 @@ bool checkAction3(int time)
 bool checkAction4(int time)
 //move joystick
 {
+  Serial.println("Move Joystick!");
     //play sound
 
     //then check for input
-    startTime = millis();
-    endTime = startTime;
+    double startTime = millis();
+    double endTime = startTime;
     int moved = JoystickMove();
     while((endTime - startTime) <= (time*1000)){ //time is in milliseconds
       if(moved == 1)
       {
+        Serial.println("Correct!");
         return true;
       }
-      endtime = millis();
+      endTime = millis();
     }
     //return false because the time ran out
+    Serial.println("Out of Time!");
     return false;
     
 }
@@ -231,6 +257,7 @@ int TurnIt()
     //and output A is closest to the metal pad in the clockwise direction (***And the outputs A and B are stationary, and we are rotating the metal pads of the rotary encoderthat can come into contact with outputs A and B)
 		if (digitalRead(DT) != currentStateCLK) 
     {
+      Serial.println("1");      
       //return 1 becasue rotary encoder has turned right (CW) 
 			return 1;
     }
@@ -238,9 +265,11 @@ int TurnIt()
     //that we have rotated counterclockwise, and Output B has already gotten onto the conductive pad (became a 0) before output A, meaning Output B was pulled to 0 before output A
     else if (digitalRead(DT) == currentStateCLK)
     // return 2 becasue rotary encoder has turned left (CCW)
+    Serial.println("2");
 	  	return 2;
   }
   //return 3 because no turn was detected
+  Serial.println("3");
   return 3;
 }
 
@@ -252,6 +281,7 @@ bool Honk()
   Serial.println("Button pressed!");
   //return 1 because button pressed
   return 1;
+  }
   //delay for debouncing
   delay(300);
   //return 0 because no button press detected
