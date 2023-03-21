@@ -23,12 +23,15 @@ DFRobotDFPlayerMini player;
 //be the reset pin or else the initial start of the game (when the device is first turned on) cannot occur
 
 //inputs for the rotary encoder (turn right, turn left, and honk it actions)
-#define CLK 2
-#define DT 3
+#define CLK 7
+#define DT 8
 #define SW 4
-//value (0 or 1) of previous state of Output A of rotary encoder
+#define VRX_PIN  A0 // Arduino pin connected to VRX pin
+#define VRY_PIN  A1 // Arduino pin connected to VRY pin
+int lastStateCLK; //value (0 or 1) of previous state of Output A of rotary encoder
 //making this a global variable (outside of setup()) because it needs to be accessed by multiple functions
-int lastStateCLK;
+int xValue = 0; // To store value of the X axis
+int yValue = 0; // To store value of the Y axis
 bool started = false;
 int roundNum = 0;
 //const int coinslotPin = , ; //should not be needed since this is set to a pin in #define
@@ -188,12 +191,15 @@ bool checkAction4(int time)
     //then check for input
     startTime = millis();
     endTime = startTime;
+    int moved = JoystickMove();
     while((endTime - startTime) <= (time*1000)){ //time is in milliseconds
-      if(/*pinLogic*/){
+      if(moved == 1)
+      {
         return true;
       }
       endtime = millis();
     }
+    //return false because the time ran out
     return false;
     
 }
@@ -204,7 +210,7 @@ void displayroundNumCount() {
   delay(1000);
   lcd.print(roundNum);
   delay(2000);
-  lcd.clear();  //clear again after use
+  lcd.clear();  //clear again after use	
 }
 
 int TurnIt()
@@ -233,5 +239,20 @@ int TurnIt()
   }
   //return 3 because no turn was detected
   return 3;
+}
 
+bool JoystickMove()
+{
+  // read analog X and Y analog values
+  xValue = analogRead(VRX_PIN);
+  yValue = analogRead(VRY_PIN);
+  if (xValue <= 258 || yValue <= 252 || xValue >= 770 || yValue >= 779)
+  {
+    //return true because the joystick was moved properly  
+    return true;
+  }
+//return false because the joystick was not moved enough
+return false;
+	//debouncing delay
+  delay(100);	
 }
