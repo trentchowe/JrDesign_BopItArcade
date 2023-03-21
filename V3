@@ -25,7 +25,7 @@ LiquidCrystal_I2C lcd(0x27, 2, 1, 0, 4, 5, 6, 7, 3, POSITIVE);
 //inputs for the rotary encoder (turn right, turn left, and honk it actions)
 #define CLK 7
 #define DT 8
-#define SW 4
+#define SW 4 // horn
 #define VRX_PIN  A0 // Arduino pin connected to VRX pin
 #define VRY_PIN  A1 // Arduino pin connected to VRY pin
 int lastStateCLK; //value (0 or 1) of previous state of Output A of rotary encoder
@@ -44,6 +44,11 @@ void setup() {
   //when turning the rotary encoder
   pinMode(CLK,INPUT_PULLUP);
   pinMode(DT,INPUT_PULLUP);
+  pinMode(SW,INPUT); //horn input
+  pinMode(VRX_PIN,INPUT); //joystick x
+  pinMode(VRY_PIN,INPUT); //joystick y
+  pinMode(coinslotPin,INPUT);
+
   //read in the initial state of CLK (Output A) which should be 1 if it's not being turned due to its internal pullup resistor 
   double lastStateCLK = digitalRead(CLK);
   pinMode(9, INPUT_PULLUP);
