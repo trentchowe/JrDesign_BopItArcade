@@ -151,13 +151,16 @@ bool checkAction1(int time)
 bool checkAction2(int time)
 //turn left
 {
-    //play sound
-
+    //play sound ("Turn Left" maybe?)
     //then check for input
-    startTime = millis();
-    endTime = startTime;
-    while((endTime - startTime) <= (time*1000)){ //time is in milliseconds
-      if(/*pinLogic*/){
+    double startTime = millis(); //number of ms since Arduino program began running
+    double endTime = startTime;
+    int Turn = TurnIt();
+    while((endTime - startTime) <= (time*1000)) //time is in milliseconds so multiply seconds (time) by 1000
+    {
+      if(Turn == 2)
+      {
+        Serial.println("")
         return true;
       }
       endtime = millis();
