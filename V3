@@ -47,12 +47,13 @@ void setup() {
   //read in the initial state of CLK (Output A) which should be 1 if it's not being turned due to its internal pullup resistor 
   double lastStateCLK = digitalRead(CLK);
   pinMode(9, INPUT_PULLUP);
+
   //setup LCD screen
   lcd.begin(16,2);//Defining 16 columns and 2 rows of lcd display
-  lcd.backlight();//To Power ON the back light
+  //lcd.backlight();//To Power ON the back light
   lcd.clear();//Clean the screen
   lcd.setCursor(0,0); //Defining positon to write from, first row,first column .
-  lcd.print("Press to Start");
+  lcd.print(" Press to Start ");
 	
   //MP3 player
   // Init USB serial port for debugging
@@ -71,135 +72,149 @@ void setup() {
   // } else {
   // 	Serial.println("Connecting to DFPlayer Mini failed!");
   // }
-
 }
 
 void loop() {
   //Serial.println("Loop");
   // put your main code here, to run repeatedly:
-    if(checkCoinslot()){
-      started = true;
-      Serial.println("Game Start");
-    }
-    if(started)
-    {
-      //4 actions (turn right, turn left, honk it, shift it)
-      int action = random(1, 4);
-      bool completed = 0; //checking if a proper action is done 
 
-      switch (action)
-      {
-        //0.05s * roundNum was changed to 0.045s * roundNum so that the fastest time (if someone gets to 99 successful attempts)
-        //is 0.545s whereas with 0.05s * roundNum, at the 99th round, that is 0.05 s (very fast)
-        case(1):
-          completed = checkAction1(5 - (.045 * roundNum));
-          break;
-        case(2):
-          completed = checkAction2(5 - (.045 * roundNum));
-          break;
-        case(3):
-          completed = checkAction3(5 - (.045 * roundNum));
-          break;
-        case(4):
-          completed = checkAction4(5 - (.045 * roundNum));
-          break;
-      }
-      
-      if(completed){
-        //can add playVictorySound() if we have time, not required
-        displayroundNumCount();
-        roundNum++;
-      }
-      else{
-        displayroundNumCount();
-        roundNum = 0;
-        started = false;
-      }
+  if(checkCoinslot()){
+    started = true;
+    Serial.println("Game Start");
+    lcd.clear();//Clean the screen
+    lcd.setCursor(0,0); //Defining positon to write from, first row,first column .
+    lcd.print(" Game Start ");
+  }
+
+  if(started == true)
+  {
+    //4 actions (turn right, turn left, honk it, shift it)
+    int action = random(1, 4);
+    bool completed = 0; //checking if a proper action is done 
+
+    switch (action)
+    {
+      //0.05s * roundNum was changed to 0.045s * roundNum so that the fastest time (if someone gets to 99 successful attempts)
+      //is 0.545s whereas with 0.05s * roundNum, at the 99th round, that is 0.05 s (very fast)
+      case(1):
+        completed = checkAction1(5 - (.045 * roundNum));
+        break;
+      case(2):
+        completed = checkAction2(5 - (.045 * roundNum));
+        break;
+      case(3):
+        completed = checkAction3(5 - (.045 * roundNum));
+        break;
+      case(4):
+        completed = checkAction4(5 - (.045 * roundNum));
+        break;
     }
+    
+    if(completed){
+      //can add playVictorySound() if we have time, not required
+      displayroundNumCount();
+      roundNum++;
+    }
+    else{
+      displayroundNumCount();
+      roundNum = 0;
+      started = false;
+    }
+  }
 }
 
 
 bool checkCoinslot()
 //checks if the SPST switch has been pushed meaning a new game should begin 
 {
-    int coinslotState = digitalRead(coinslotPin);
-    if(coinslotState == LOW)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
+  int coinslotState = digitalRead(coinslotPin);
+  if(coinslotState == LOW)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 bool checkAction1(int time) 
 //"Turn Right" steering wheel turn action
 {
-    Serial.println("Turn Right!");
-    //play sound ("Turn Right" maybe?)
-    //then check for input
-    double startTime = millis(); //number of ms since Arduino program began running
-    double endTime = startTime;
-    int Turn = TurnIt();
-    while((endTime - startTime) <= (time*1000)) //time is in milliseconds so multiply seconds (time) by 1000
+  Serial.println("Turn Right!");
+  lcd.clear();//Clean the screen
+  lcd.setCursor(0,0); //Defining positon to write from, first row,first column .
+  lcd.print(" Turn Right! ");
+  //play sound ("Turn Right" maybe?)
+  //then check for input
+  double startTime = millis(); //number of ms since Arduino program began running
+  double endTime = startTime;
+  int Turn = TurnIt();
+  while((endTime - startTime) <= (time*1000)) //time is in milliseconds so multiply seconds (time) by 1000
+  {
+    if(Turn == 1)
     {
-      if(Turn == 1)
-      {
-        Serial.println("Correct!");
-        return true;
-      }
-      endTime = millis();
+      Serial.println("Correct!");
+      return true;
     }
-    Serial.println("Out of Time!");
-    return false;
+    endTime = millis();
+  }
+  Serial.println("Out of Time!");
+  return false;
 }
 
 bool checkAction2(int time)
 //turn left
 {
-    //play sound ("Turn Left" maybe?)
-    //then check for input
-    Serial.println("Turn Left!");
-    double startTime = millis(); //number of ms since Arduino program began running
-    double endTime = startTime;
-    int Turn = TurnIt();
-    while((endTime - startTime) <= (time*1000)) //time is in milliseconds so multiply seconds (time) by 1000
+  //play sound ("Turn Left" maybe?)
+  //then check for input
+  Serial.println("Turn Left!");
+  lcd.clear();//Clean the screen
+  lcd.setCursor(0,0); //Defining positon to write from, first row,first column .
+  lcd.print(" Turn Left! ");
+
+  double startTime = millis(); //number of ms since Arduino program began running
+  double endTime = startTime;
+  int Turn = TurnIt();
+  while((endTime - startTime) <= (time*1000)) //time is in milliseconds so multiply seconds (time) by 1000
+  {
+    if(Turn == 2)
     {
-      if(Turn == 2)
-      {
-        Serial.println("Correct!");
-        return true;
-      }
-      endTime = millis();
+      Serial.println("Correct!");
+      return true;
     }
-    Serial.println("Out of Time!");
-    return false;
+    endTime = millis();
+  }
+  Serial.println("Out of Time!");
+  return false;
 }
 
 bool checkAction3(int time)
 //honk horn
 {
-    Serial.println("Honk Horn!");
-    //play sound
+  Serial.println("Honk Horn!");
+  lcd.clear();//Clean the screen
+  lcd.setCursor(0,0); //Defining positon to write from, first row,first column .
+  lcd.print(" Honk Horn! ");
+  //play sound
 
-    //then check for input
-    double startTime = millis();
-    double endTime = startTime;
+  //then check for input
+  double startTime = millis();
+  double endTime = startTime;
 
-    double currentStateCLK = digitalRead(CLK);
-    lastStateCLK = currentStateCLK;
-    int btnState = digitalRead(SW);
+  double currentStateCLK = digitalRead(CLK);
+  lastStateCLK = currentStateCLK;
+  int btnState = digitalRead(SW);
 
-    while((endTime - startTime) <= (time*1000)){ //time is in milliseconds
-      if(btnState == HIGH){
-        Serial.println("Correct!");
-        return true;
-      }
-      endTime = millis();
+  while((endTime - startTime) <= (time*1000)){ //time is in milliseconds
+    if(btnState == HIGH){
+      Serial.println("Correct!");
+      return true;
     }
-    Serial.println("Out of Time!");
-    return false;
+    endTime = millis();
+  }
+  Serial.println("Out of Time!");
+  return false;
     
 }
 
@@ -207,23 +222,26 @@ bool checkAction4(int time)
 //move joystick
 {
   Serial.println("Move Joystick!");
-    //play sound
+  lcd.clear();//Clean the screen
+  lcd.setCursor(0,0); //Defining positon to write from, first row,first column .
+  lcd.print("Move Joystick");
+  //play sound
 
-    //then check for input
-    double startTime = millis();
-    double endTime = startTime;
-    int moved = JoystickMove();
-    while((endTime - startTime) <= (time*1000)){ //time is in milliseconds
-      if(moved == 1)
-      {
-        Serial.println("Correct!");
-        return true;
-      }
-      endTime = millis();
+  //then check for input
+  double startTime = millis();
+  double endTime = startTime;
+  int moved = JoystickMove();
+  while((endTime - startTime) <= (time*1000)){ //time is in milliseconds
+    if(moved == 1)
+    {
+      Serial.println("Correct!");
+      return true;
     }
-    //return false because the time ran out
-    Serial.println("Out of Time!");
-    return false;
+    endTime = millis();
+  }
+  //return false because the time ran out
+  Serial.println("Out of Time!");
+  return false;
     
 }
 void displayroundNumCount() {
@@ -258,7 +276,7 @@ int TurnIt()
     //that we have rotated counterclockwise, and Output B has already gotten onto the conductive pad (became a 0) before output A, meaning Output B was pulled to 0 before output A
     else if (digitalRead(DT) == currentStateCLK)
     // return 2 becasue rotary encoder has turned left (CCW)
-	  	return 2;
+	  return 2;
   }
   //return 3 because no turn was detected
   return 3;
@@ -289,8 +307,8 @@ bool JoystickMove()
     //return true because the joystick was moved properly  
     return true;
   }
-//return false because the joystick was not moved enough
-return false;
+  //return false because the joystick was not moved enough
+  return false;
 	//debouncing delay
   delay(100);	
 }
