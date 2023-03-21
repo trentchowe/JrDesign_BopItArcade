@@ -244,6 +244,20 @@ int TurnIt()
   return 3;
 }
 
+bool Honk()
+{
+  int btnState = digitalRead(SW);
+  if (btnState == HIGH) 
+  {
+  Serial.println("Button pressed!");
+  //return 1 because button pressed
+  return 1;
+  //delay for debouncing
+  delay(300);
+  //return 0 because no button press detected
+  return 0;
+}
+
 bool JoystickMove()
 {
   // read analog X and Y analog values
